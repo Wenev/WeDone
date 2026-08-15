@@ -34,8 +34,14 @@ func NewAssistant(email, initial string, managerId *uuid.UUID) (*User, error) {
 	if email == "" {
 		return nil, ErrInvalidEmail
 	}
+
+	id, err := uuid.NewV7()
+	if err != nil {
+		return nil, err
+	}
+
 	return &User{
-		ID:        uuid.New(),
+		ID:        id,
 		Email:     email,
 		Initial:   initial,
 		ManagerID: managerId,
