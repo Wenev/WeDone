@@ -25,4 +25,14 @@ func (i *Issuer) Issue(userID uuid.UUID, role string, isAdmin bool, managerID *u
 	token.SetIssuedAt(time.Now())
 	token.SetNotBefore(time.Now())
 	token.SetExpiration(time.Now().Add(i.ttl))
+	token.SetString("role", role)
+
+	if err := token.Set("is_admin", isAdmin); err != nil {
+		return "", err
+	}
+	if managerID != nil {
+		token.SetString("manager_id", managerID.String())
+	}
+
+	return token.V4Sign
 }
