@@ -32,7 +32,7 @@ func (uc *ManagerSignUpUseCase) Execute(ctx context.Context, input dto.ManagerSi
 		return nil, fmt.Errorf("failed to verify initial: %w", err)
 	}
 
-	existing, err = uc.repo.FindByProviderID(ctx, input.GoogleID, "google")
+	existing, err = uc.repo.FindByGoogleID(ctx, input.GoogleID)
 	if err == nil && existing != nil {
 		return nil, ErrGoogleIDTaken
 	}

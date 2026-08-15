@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/Wenev/WeDone/backend/internal/auth/application/dto"
 	"github.com/Wenev/WeDone/backend/internal/auth/application/utility"
@@ -28,13 +29,20 @@ func NewAssistantSignUpUseCase(repo domain.UserRepository, hasher utility.Passwo
 }
 
 func (uc *AssistantSignUpUseCase) Execute(ctx context.Context, input dto.AssistantSignUpInput) (*dto.UserOutput, error) {
-	_, err := uc.repo.FindByEmail(ctx, input.Email)
-	if err != nil {
+	existing, err := uc.repo.FindByEmail(ctx, input.Email)
+	if err == nil && existing != nil {
 		return nil, ErrEmailTaken
 	}
-	_, err = uc.repo.FindByInitial(ctx, input.Initial)
-	if err != nil {
+	if err != nil && !errors.Is(err, domain.ErrUserNotFound) {
+		return nil, fmt.Errorf("failed to verify email: %w", err)
+	}
+
+	existing, err = uc.repo.FindByInitial(ctx, input.Initial)
+	if err == nil && existing != nil {
 		return nil, ErrInitialTaken
+	}
+	if err != nil && !errors.Is(err, domain.ErrUserNotFound) {
+		return nil, fmt.Errorf("failed to verify initial: %w", err)
 	}
 
 	hashed, err := uc.hasher.Hash(input.Password)

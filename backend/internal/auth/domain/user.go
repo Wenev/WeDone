@@ -17,6 +17,7 @@ var (
 	ErrManagerRequiresNoParent = errors.New("A manager must not have a manager_id")
 	ErrInvalidEmail            = errors.New("email is invalid or empty")
 	ErrUserNotFound            = errors.New("user not found")
+	ErrOnlyManagerCanBeAdmin   = errors.New("only a manager can be an admin")
 )
 
 type User struct {
