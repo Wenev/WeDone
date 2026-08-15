@@ -17,8 +17,14 @@ type ManagerSignUpInput struct {
 	GoogleID string
 }
 
+type ToggleVolunteerAdminInput struct {
+	ID *uuid.UUID
+	IsAdmin bool
+}
+
 type SignInInput struct {
 	Email *string
 	Initial *string
 	Password string
 }
+
