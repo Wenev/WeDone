@@ -23,11 +23,11 @@ type User struct {
 	ID        uuid.UUID
 	Email     string
 	Initial   string
+	Password  string
+	GoogleID  string
 	Role      Role
 	ManagerID *uuid.UUID
 	IsAdmin   bool
-	Password  *string
-	GoogleID  *string
 }
 
 func NewAssistant(email, initial string, managerId *uuid.UUID) (*User, error) {
@@ -49,11 +49,6 @@ func NewManager(email, initial, googleId string) (*User, error) {
 		return nil, ErrInvalidEmail
 	}
 
-	var googleIDptr *string
-	if googleId != "" {
-		googleIDptr = &googleId
-	}
-
 	id, err := uuid.NewV7()
 	if err != nil {
 		return nil, err
@@ -63,7 +58,7 @@ func NewManager(email, initial, googleId string) (*User, error) {
 		ID:        id,
 		Email:     email,
 		Initial:   initial,
-		GoogleID:  googleIDptr,
+		GoogleID:  googleId,
 		ManagerID: nil,
 		Role:      RoleManager,
 		IsAdmin:   false,

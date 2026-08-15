@@ -49,7 +49,7 @@ func (uc *ManagerSignUpUseCase) Execute(ctx context.Context, input dto.ManagerSi
 	if err != nil {
 		return nil, err
 	}
-	user.Password = &hashed
+	user.Password = hashed
 
 	if err := uc.repo.Create(ctx, user); err != nil {
 		return nil, err
