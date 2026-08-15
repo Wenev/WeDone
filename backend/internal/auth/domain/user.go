@@ -71,3 +71,11 @@ func NewManager(email, initial, googleId string) (*User, error) {
 		IsAdmin:   false,
 	}, nil
 }
+
+func (u *User) SetIsAdmin(isAdmin bool) error {
+	if isAdmin && u.Role != RoleManager {
+		return ErrOnlyManagerCanBeAdmin
+	}
+	u.IsAdmin = isAdmin
+	return nil
+}
