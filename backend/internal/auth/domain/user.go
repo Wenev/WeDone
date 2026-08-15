@@ -43,16 +43,23 @@ func NewAssistant(email, initial string, managerId *uuid.UUID) (*User, error) {
 	}, nil
 }
 
-func NewManager(email, initial string, volunteerAdmin bool) (*User, error) {
+func NewManager(email, initial, googleId string) (*User, error) {
 	if email == "" {
 		return nil, ErrInvalidEmail
 	}
+
+	var googleIDptr *string
+	if googleId != "" {
+		googleIDptr = &googleId
+	}
+
 	return &User{
 		ID: uuid.New(),
 		Email: email,
 		Initial: initial,
+		GoogleID: googleIDptr,
 		ManagerID: nil,
 		Role: RoleManager,
-		IsAdmin: volunteerAdmin,
+		IsAdmin: false,
 	}, nil
 }

@@ -15,7 +15,6 @@ type ManagerSignUpInput struct {
 	Initial string
 	Password string
 	GoogleID string
-	VolunteerAdmin bool
 }
 
 type SignInInput struct {
