@@ -7,14 +7,12 @@ import (
 	"github.com/Wenev/WeDone/backend/internal/auth/domain"
 )
 
-
-
 type ToggleVolunteerAdminUseCase struct {
 	repo domain.UserRepository
 }
 
 func (uc *ToggleVolunteerAdminUseCase) Execute(ctx context.Context, input dto.ToggleVolunteerAdminInput) (*dto.UserOutput, error) {
-	user, err := uc.repo.FindByID(ctx, *input.ID)
+	user, err := uc.repo.FindByID(ctx, input.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -23,7 +21,7 @@ func (uc *ToggleVolunteerAdminUseCase) Execute(ctx context.Context, input dto.To
 	if err := uc.repo.Update(ctx, user); err != nil {
 		return nil, err
 	}
-	
+
 	output := dto.ToUserOutput(user)
 	return &output, nil
 }

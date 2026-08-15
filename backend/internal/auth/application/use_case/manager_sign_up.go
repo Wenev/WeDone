@@ -2,32 +2,44 @@ package usecase
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"github.com/Wenev/WeDone/backend/internal/auth/application/dto"
 	"github.com/Wenev/WeDone/backend/internal/auth/application/utility"
 	"github.com/Wenev/WeDone/backend/internal/auth/domain"
 )
 
-
-
 type ManagerSignUpUseCase struct {
-	repo domain.UserRepository
+	repo   domain.UserRepository
 	hasher utility.PasswordHasher
 }
 
 func (uc *ManagerSignUpUseCase) Execute(ctx context.Context, input dto.ManagerSignUpInput) (*dto.UserOutput, error) {
-	_, err := uc.repo.FindByEmail(ctx, input.Email)
-	if err != nil {
+	existing, err := uc.repo.FindByEmail(ctx, input.Email)
+	if err == nil && existing != nil {
 		return nil, ErrEmailTaken
 	}
-	_, err = uc.repo.FindByInitial(ctx, input.Initial)
-	if err != nil {
+	if err != nil && !errors.Is(err, domain.ErrUserNotFound) {
+		return nil, fmt.Errorf("failed to verify email: %w", err)
+	}
+
+	existing, err = uc.repo.FindByInitial(ctx, input.Initial)
+	if err == nil && existing != nil {
 		return nil, ErrInitialTaken
 	}
-	_, err = uc.repo.FindByProviderID(ctx, input.GoogleID, "google")
-	if err != nil {
-		return nil, ErrInitialTaken
+	if err != nil && !errors.Is(err, domain.ErrUserNotFound) {
+		return nil, fmt.Errorf("failed to verify initial: %w", err)
 	}
+
+	existing, err = uc.repo.FindByProviderID(ctx, input.GoogleID, "google")
+	if err == nil && existing != nil {
+		return nil, ErrGoogleIDTaken
+	}
+	if err != nil && !errors.Is(err, domain.ErrUserNotFound) {
+		return nil, fmt.Errorf("failed to verify provider ID: %w", err)
+	}
+
 	hashed, err := uc.hasher.Hash(input.Password)
 	if err != nil {
 		return nil, err

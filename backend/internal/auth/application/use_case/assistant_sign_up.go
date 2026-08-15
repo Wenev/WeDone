@@ -10,24 +10,24 @@ import (
 )
 
 var (
-	ErrEmailTaken = errors.New("an account with this email already exists")
-	ErrInitialTaken = errors.New("an account with this Initial already exists")
+	ErrEmailTaken    = errors.New("an account with this email already exists")
+	ErrInitialTaken  = errors.New("an account with this Initial already exists")
+	ErrGoogleIDTaken = errors.New("an account with this Google Acount already exists")
 )
 
-
 type AssistantSignUpUseCase struct {
-	repo domain.UserRepository
+	repo   domain.UserRepository
 	hasher utility.PasswordHasher
 }
 
 func NewAssistantSignUpUseCase(repo domain.UserRepository, hasher utility.PasswordHasher) *AssistantSignUpUseCase {
 	return &AssistantSignUpUseCase{
-		repo: repo,
+		repo:   repo,
 		hasher: hasher,
 	}
 }
 
-func (uc *AssistantSignUpUseCase) Execute(ctx context.Context, input dto.AssistantSignUpInput) (*dto.UserOutput, error){
+func (uc *AssistantSignUpUseCase) Execute(ctx context.Context, input dto.AssistantSignUpInput) (*dto.UserOutput, error) {
 	_, err := uc.repo.FindByEmail(ctx, input.Email)
 	if err != nil {
 		return nil, ErrEmailTaken
