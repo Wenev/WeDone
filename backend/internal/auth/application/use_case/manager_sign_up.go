@@ -24,7 +24,7 @@ func (uc *ManagerSignUpUseCase) Execute(ctx context.Context, input dto.ManagerSi
 	if err != nil {
 		return nil, ErrInitialTaken
 	}
-	_, err = uc.repo.FindByProviderID(ctx, "google", input.GoogleID)
+	_, err = uc.repo.FindByProviderID(ctx, input.GoogleID, "google")
 	if err != nil {
 		return nil, ErrInitialTaken
 	}
