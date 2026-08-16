@@ -1,0 +1,25 @@
+# Git
+.git
+.gitignore
+
+# Go binaries and build artifacts
+/bin/
+/cmd/*/main
+*.exe
+*.test
+*.out
+
+# Frontend dependencies and build
+/web/node_modules/
+/web/.next/
+/web/out/
+
+# Local databases and volumes
+*.db
+*.sqlite
+*.sqlite-con
+
+# IDE / OS specific
+.vscode/
+.idea/
+.DS_Store
