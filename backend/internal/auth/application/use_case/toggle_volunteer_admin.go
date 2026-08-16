@@ -17,8 +17,11 @@ func (uc *ToggleVolunteerAdminUseCase) Execute(ctx context.Context, input dto.To
 		return nil, err
 	}
 
-	user.IsAdmin = input.IsAdmin
-	if err := uc.repo.Update(ctx, user); err != nil {
+	if err := user.SetIsAdmin(input.IsAdmin); err != nil {
+		return nil, err
+	}
+
+	if err := uc.repo.UpdateAdminStatus(ctx, user.ID, user.IsAdmin); err != nil {
 		return nil, err
 	}
 

@@ -3,7 +3,9 @@ package utility
 import "context"
 
 type GoogleUserInfo struct {
-
+	GoogleID      string
+	Email         string
+	VerifiedEmail bool
 }
 
 type OAuthProvider interface {
