@@ -22,7 +22,7 @@ type ToggleVolunteerAdminInput struct {
 }
 
 type SignInInput struct {
-	Email    *string
-	Initial  *string
+	Email    string
+	Initial  string
 	Password string
 }
