@@ -15,6 +15,13 @@ type ManagerSignUpUseCase struct {
 	hasher utility.PasswordHasher
 }
 
+func NewManagerSignUpUseCase(repo domain.UserRepository, hasher utility.PasswordHasher) *ManagerSignUpUseCase {
+	return &ManagerSignUpUseCase{
+		repo:   repo,
+		hasher: hasher,
+	}
+}
+
 func (uc *ManagerSignUpUseCase) Execute(ctx context.Context, input dto.ManagerSignUpInput) (*dto.UserOutput, error) {
 	existing, err := uc.repo.FindByEmail(ctx, input.Email)
 	if err == nil && existing != nil {
