@@ -21,7 +21,7 @@ func NewPostgresUserRepository(db *gorm.DB) *PostgresUserRepository {
 
 func (repo *PostgresUserRepository) Create(ctx context.Context, user *domain.User) error {
 	model := FromDomain(user)
-	result := repo.db.Create(&model)
+	result := repo.db.WithContext(ctx).Create(&model)
 	if result.Error != nil {
 		return result.Error
 	}
