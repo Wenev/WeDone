@@ -25,3 +25,8 @@ func ToUserOutput(u *domain.User) UserOutput {
 		ManagerID: u.ManagerID,
 	}
 }
+
+type AuthOutput struct {
+	Token string
+	User  UserOutput
+}

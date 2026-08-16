@@ -1,0 +1,60 @@
+# Binaries and build artifacts
+bin/
+dist/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Go test coverage
+cover.out
+coverage.html
+coverage.txt
+
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Database and persistent data
+*.db
+*.sqlite
+*.sqlite3
+postgres_data/
+data/
+
+# OS-specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDEs and Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+
+# AI Agent & Assistant configurations
+.agents/
+.gemini/
+.cline/
+.cursor/
+.windsurf/
+.copilot/
+.aider*
+
+# Logs
+*.log
+logs/
