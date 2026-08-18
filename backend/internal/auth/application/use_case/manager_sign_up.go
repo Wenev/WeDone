@@ -39,12 +39,14 @@ func (uc *ManagerSignUpUseCase) Execute(ctx context.Context, input dto.ManagerSi
 		return nil, fmt.Errorf("failed to verify initial: %w", err)
 	}
 
-	existing, err = uc.repo.FindByGoogleID(ctx, input.GoogleID)
-	if err == nil && existing != nil {
-		return nil, ErrGoogleIDTaken
-	}
-	if err != nil && !errors.Is(err, domain.ErrUserNotFound) {
-		return nil, fmt.Errorf("failed to verify provider ID: %w", err)
+	if input.GoogleID != "" {
+		existing, err = uc.repo.FindByGoogleID(ctx, input.GoogleID)
+		if err == nil && existing != nil {
+			return nil, ErrGoogleIDTaken
+		}
+		if err != nil && !errors.Is(err, domain.ErrUserNotFound) {
+			return nil, fmt.Errorf("failed to verify provider ID: %w", err)
+		}
 	}
 
 	hashed, err := uc.hasher.Hash(input.Password)
