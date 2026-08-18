@@ -22,7 +22,11 @@ type ToggleVolunteerAdminInput struct {
 }
 
 type SignInInput struct {
-	Email    string
-	Initial  string
+	//Identifier may be email or initial
+	Identifier string
 	Password string
+}
+
+type PromoteAssistantInput struct {
+	AssistantID uuid.UUID
 }
