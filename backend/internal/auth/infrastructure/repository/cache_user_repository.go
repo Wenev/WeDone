@@ -45,6 +45,20 @@ type CacheUserRepository struct {
 	sf       singleflight.Group
 }
 
+func (repo *CacheUserRepository) singleFlightKey(key string, fetch func(ctx context.Context) (*domain.User, error)) (*domain.User, error) {
+	val, err, _ := repo.sf.Do(key, func() (interface{}, error) {
+		detached, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer cancel()
+		return fetch(detached)
+	})
+
+	if err != nil {
+		return nil, err
+	}
+	return val.(*domain.User), nil
+}
+
+
 func (repo *CacheUserRepository) setCache(ctx context.Context, user *domain.User) error {
 	raw, err := json.Marshal(user)
 	if err != nil {
@@ -126,18 +140,16 @@ func (repo *CacheUserRepository) FindByID(ctx context.Context, id uuid.UUID) (*d
 			return &user, nil
 		}
 	}
-	val, err, _ := repo.sf.Do(key, func() (interface{}, error) {
-		user, dbErr := repo.userRepo.FindByID(ctx, id)
-		if dbErr != nil {
-			return nil, dbErr
-		}
-		repo.setCache(ctx, user)
-		return user, nil
+	user, err := repo.singleFlightKey(key, func(ctx context.Context) (*domain.User, error) {
+		return repo.userRepo.FindByID(ctx, id)
 	})
 	if err != nil {
 		return nil, err
 	}
-	return val.(*domain.User), nil
+
+	repo.setCache(ctx, user)
+
+	return user, nil
 }
 
 func (repo *CacheUserRepository) FindByInitial(ctx context.Context, initial string) (*domain.User, error) {
