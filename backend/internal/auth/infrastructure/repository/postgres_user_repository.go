@@ -21,7 +21,7 @@ func NewPostgresUserRepository(db *gorm.DB) *PostgresUserRepository {
 
 func (repo *PostgresUserRepository) Create(ctx context.Context, user *domain.User) error {
 	model := FromDomain(user)
-	result := repo.db.WithContext(ctx).Create(&model)
+	result := repo.db.WithContext(ctx).Create(model)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -91,17 +91,23 @@ func (repo *PostgresUserRepository) Update(ctx context.Context, user *domain.Use
 }
 
 func (repo *PostgresUserRepository) UpdateAdminStatus(ctx context.Context, id uuid.UUID, isAdmin bool) error {
-	result := repo.db.WithContext(ctx).Where("id = ?", id).Update("is_admin", isAdmin)
+	result := repo.db.WithContext(ctx).Model(&UserModel{}).Where("id = ?", id).Update("is_admin", isAdmin)
 	if result.Error != nil {
 		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return domain.ErrUserNotFound
 	}
 	return nil
 }
 
 func (repo *PostgresUserRepository) UpdatePassword(ctx context.Context, id uuid.UUID, password string) error {
-	result := repo.db.WithContext(ctx).Where("id = ?", id).Update("password", password)
+	result := repo.db.WithContext(ctx).Model(&UserModel{}).Where("id = ?", id).Update("password", password)
 	if result.Error != nil {
 		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return domain.ErrUserNotFound
 	}
 	return nil
 }
