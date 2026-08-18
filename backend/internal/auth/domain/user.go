@@ -18,6 +18,7 @@ var (
 	ErrInvalidEmail            = errors.New("email is invalid or empty")
 	ErrUserNotFound            = errors.New("user not found")
 	ErrOnlyManagerCanBeAdmin   = errors.New("only a manager can be an admin")
+	ErrInvalidInitial = errors.New("initial is invalid or empty")
 )
 
 type User struct {
@@ -31,9 +32,27 @@ type User struct {
 	IsAdmin   bool
 }
 
+func (u *User) Validate() error {
+	if _, err := NormalizeEmail(u.Email); err != nil {
+		return ErrInvalidEmail
+	}
+	if _, err := NormalizeInitial(u.Initial); err != nil {
+		return ErrInvalidInitial
+	}
+	if u.Role == RoleManager && u.ManagerID != nil {
+		return ErrManagerRequiresNoParent
+	}
+	return nil
+}
+
 func NewAssistant(email, initial string, managerId *uuid.UUID) (*User, error) {
-	if email == "" {
+	normalizedEmail, err := NormalizeEmail(email)
+	if err != nil {
 		return nil, ErrInvalidEmail
+	}
+	normalizedInitial, err := NormalizeInitial(initial)
+	if err != nil {
+		return nil, ErrInvalidInitial
 	}
 
 	id, err := uuid.NewV7()
@@ -43,8 +62,8 @@ func NewAssistant(email, initial string, managerId *uuid.UUID) (*User, error) {
 
 	return &User{
 		ID:        id,
-		Email:     email,
-		Initial:   initial,
+		Email:     normalizedEmail,
+		Initial:   normalizedInitial,
 		ManagerID: managerId,
 		Role:      RoleAssistant,
 		IsAdmin:   false,
@@ -52,8 +71,13 @@ func NewAssistant(email, initial string, managerId *uuid.UUID) (*User, error) {
 }
 
 func NewManager(email, initial, googleId string) (*User, error) {
-	if email == "" {
+	normalizedEmail, err := NormalizeEmail(email)
+	if err != nil {
 		return nil, ErrInvalidEmail
+	}
+	normalizedInitial, err := NormalizeInitial(initial)
+	if err != nil {
+		return nil, ErrInvalidInitial
 	}
 
 	id, err := uuid.NewV7()
@@ -63,8 +87,8 @@ func NewManager(email, initial, googleId string) (*User, error) {
 
 	return &User{
 		ID:        id,
-		Email:     email,
-		Initial:   initial,
+		Email:     normalizedEmail,
+		Initial:   normalizedInitial,
 		GoogleID:  googleId,
 		ManagerID: nil,
 		Role:      RoleManager,
