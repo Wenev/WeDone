@@ -60,9 +60,8 @@ func (repo *CacheUserRepository) singleFlightKey(key string, fetch func(ctx cont
 	return val.(*domain.User), nil
 }
 
-
 func (repo *CacheUserRepository) setCache(ctx context.Context, user *domain.User) error {
-	raw, err := json.Marshal(user)
+	raw, err := json.Marshal(user.PublicUser)
 	if err != nil {
 		slog.Warn("cache: marshal failed", "err", err)
 		return err
@@ -137,9 +136,9 @@ func (repo *CacheUserRepository) FindByGoogleID(ctx context.Context, googleID st
 func (repo *CacheUserRepository) FindByID(ctx context.Context, id uuid.UUID) (*domain.User, error) {
 	key := userIDKey(id)
 	if raw, err := repo.cache.Get(ctx, key); err == nil {
-		var user domain.User
-		if jsonErr := json.Unmarshal([]byte(raw), &user); jsonErr == nil {
-			return &user, nil
+		var publicUser domain.PublicUser
+		if jsonErr := json.Unmarshal([]byte(raw), &publicUser); jsonErr == nil {
+			return &domain.User{PublicUser: publicUser}, nil
 		}
 	}
 	user, err := repo.singleFlightKey(key, func(ctx context.Context) (*domain.User, error) {

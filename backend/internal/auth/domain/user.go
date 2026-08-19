@@ -18,18 +18,22 @@ var (
 	ErrInvalidEmail            = errors.New("email is invalid or empty")
 	ErrUserNotFound            = errors.New("user not found")
 	ErrOnlyManagerCanBeAdmin   = errors.New("only a manager can be an admin")
-	ErrInvalidInitial = errors.New("initial is invalid or empty")
+	ErrInvalidInitial          = errors.New("initial is invalid or empty")
 )
 
-type User struct {
+type PublicUser struct {
 	ID        uuid.UUID
 	Email     string
 	Initial   string
-	Password  string
 	GoogleID  string
 	Role      Role
 	ManagerID *uuid.UUID
 	IsAdmin   bool
+}
+
+type User struct {
+	PublicUser
+	Password string
 }
 
 func (u *User) Validate() error {
@@ -61,12 +65,14 @@ func NewAssistant(email, initial string, managerId *uuid.UUID) (*User, error) {
 	}
 
 	return &User{
-		ID:        id,
-		Email:     normalizedEmail,
-		Initial:   normalizedInitial,
-		ManagerID: managerId,
-		Role:      RoleAssistant,
-		IsAdmin:   false,
+		PublicUser: PublicUser{
+			ID:        id,
+			Email:     normalizedEmail,
+			Initial:   normalizedInitial,
+			ManagerID: managerId,
+			Role:      RoleAssistant,
+			IsAdmin:   false,
+		},
 	}, nil
 }
 
@@ -86,13 +92,15 @@ func NewManager(email, initial, googleId string) (*User, error) {
 	}
 
 	return &User{
-		ID:        id,
-		Email:     normalizedEmail,
-		Initial:   normalizedInitial,
-		GoogleID:  googleId,
-		ManagerID: nil,
-		Role:      RoleManager,
-		IsAdmin:   false,
+		PublicUser: PublicUser{
+			ID:        id,
+			Email:     normalizedEmail,
+			Initial:   normalizedInitial,
+			GoogleID:  googleId,
+			ManagerID: nil,
+			Role:      RoleManager,
+			IsAdmin:   false,
+		},
 	}, nil
 }
 

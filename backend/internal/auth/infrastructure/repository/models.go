@@ -26,14 +26,16 @@ func (UserModel) TableName() string {
 
 func ToDomain(m *UserModel) *domain.User {
 	return &domain.User{
-		ID:        m.ID,
-		Email:     m.Email,
-		Initial:   m.Initial,
-		Password:  m.Password,
-		GoogleID:  m.GoogleID,
-		Role:      domain.Role(m.Role),
-		ManagerID: m.ManagerID,
-		IsAdmin:   m.IsAdmin,
+		PublicUser: domain.PublicUser{
+			ID:        m.ID,
+			Email:     m.Email,
+			Initial:   m.Initial,
+			GoogleID:  m.GoogleID,
+			Role:      domain.Role(m.Role),
+			ManagerID: m.ManagerID,
+			IsAdmin:   m.IsAdmin,
+		},
+		Password: m.Password,
 	}
 }
 
