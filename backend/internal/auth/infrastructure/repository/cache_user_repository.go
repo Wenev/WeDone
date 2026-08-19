@@ -45,6 +45,8 @@ type CacheUserRepository struct {
 	sf       singleflight.Group
 }
 
+var _ domain.UserRepository = (*CacheUserRepository)(nil)
+
 func (repo *CacheUserRepository) singleFlightKey(key string, fetch func(ctx context.Context) (*domain.User, error)) (*domain.User, error) {
 	val, err, _ := repo.sf.Do(key, func() (interface{}, error) {
 		detached, cancel := context.WithTimeout(context.Background(), 3*time.Second)

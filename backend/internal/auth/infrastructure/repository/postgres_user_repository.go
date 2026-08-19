@@ -13,6 +13,8 @@ type PostgresUserRepository struct {
 	db *gorm.DB
 }
 
+var _ domain.UserRepository = (*PostgresUserRepository)(nil)
+
 func NewPostgresUserRepository(db *gorm.DB) *PostgresUserRepository {
 	return &PostgresUserRepository{
 		db: db,
