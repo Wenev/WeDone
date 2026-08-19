@@ -22,10 +22,11 @@ type AssistantSignUpUseCase struct {
 	emailPolicy domain.EmailDomainPolicy
 }
 
-func NewAssistantSignUpUseCase(repo domain.UserRepository, hasher utility.PasswordHasher) *AssistantSignUpUseCase {
+func NewAssistantSignUpUseCase(repo domain.UserRepository, hasher utility.PasswordHasher, emailPolicy domain.EmailDomainPolicy) *AssistantSignUpUseCase {
 	return &AssistantSignUpUseCase{
 		repo:   repo,
 		hasher: hasher,
+		emailPolicy: emailPolicy,
 	}
 }
 

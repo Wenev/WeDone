@@ -16,10 +16,11 @@ type ManagerSignUpUseCase struct {
 	emailPolicy domain.EmailDomainPolicy
 }
 
-func NewManagerSignUpUseCase(repo domain.UserRepository, hasher utility.PasswordHasher) *ManagerSignUpUseCase {
+func NewManagerSignUpUseCase(repo domain.UserRepository, hasher utility.PasswordHasher, emailPolicy domain.EmailDomainPolicy) *ManagerSignUpUseCase {
 	return &ManagerSignUpUseCase{
 		repo:   repo,
 		hasher: hasher,
+		emailPolicy: emailPolicy,
 	}
 }
 
