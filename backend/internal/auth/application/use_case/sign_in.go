@@ -41,10 +41,13 @@ func (uc *SignInUseCase) Execute(ctx context.Context, input dto.SignInInput) (*d
 	if err != nil && !errors.Is(err, domain.ErrUserNotFound) {
 		return nil, err
 	}
+	if foundUser == nil {
+		return nil, domain.ErrInvalidCredentials
+	}
 
 	
 	if passValidation, err := uc.hasher.Compare(foundUser.Password, input.Password); err != nil || !passValidation {
-		return nil, errors.New("email, initial, or password invalid")
+		return nil, domain.ErrInvalidCredentials
 	}
 
 	token, err := uc.issuer.Issue(foundUser.ID, string(foundUser.Role), foundUser.IsAdmin, foundUser.ManagerID)
