@@ -28,12 +28,5 @@ func (uc *PromoteAssistantCase) Execute(ctx context.Context, input dto.PromoteAs
 		return errors.New("user is not an assistant")
 	}
 
-	assistant.Role = domain.RoleManager
-	assistant.ManagerID = nil
-
-	if err := uc.repo.Update(ctx, assistant); err != nil {
-		return err
-	}
-
-	return nil
+	return uc.repo.PromoteToManager(ctx, input.AssistantID)
 }
