@@ -14,26 +14,51 @@ const (
 )
 
 var (
-	ErrManagerRequiresNoParent = errors.New("A manager must not have a manager_id")
+	ErrManagerRequiresNoParent = errors.New("a manager must not have a manager_id")
 	ErrInvalidEmail            = errors.New("email is invalid or empty")
 	ErrUserNotFound            = errors.New("user not found")
 	ErrOnlyManagerCanBeAdmin   = errors.New("only a manager can be an admin")
+	ErrInvalidInitial          = errors.New("initial is invalid or empty")
+	ErrInvalidCredentials       = errors.New("email, initial, or password invalid")
+	ErrEmailDomainNotAllowed	= errors.New("email domain is not allowed")
 )
 
-type User struct {
+type PublicUser struct {
 	ID        uuid.UUID
 	Email     string
 	Initial   string
-	Password  string
 	GoogleID  string
 	Role      Role
 	ManagerID *uuid.UUID
 	IsAdmin   bool
 }
 
+type User struct {
+	PublicUser
+	Password string
+}
+
+func (u *User) Validate() error {
+	if _, err := NormalizeEmail(u.Email); err != nil {
+		return ErrInvalidEmail
+	}
+	if _, err := NormalizeInitial(u.Initial); err != nil {
+		return ErrInvalidInitial
+	}
+	if u.Role == RoleManager && u.ManagerID != nil {
+		return ErrManagerRequiresNoParent
+	}
+	return nil
+}
+
 func NewAssistant(email, initial string, managerId *uuid.UUID) (*User, error) {
-	if email == "" {
+	normalizedEmail, err := NormalizeEmail(email)
+	if err != nil {
 		return nil, ErrInvalidEmail
+	}
+	normalizedInitial, err := NormalizeInitial(initial)
+	if err != nil {
+		return nil, ErrInvalidInitial
 	}
 
 	id, err := uuid.NewV7()
@@ -42,18 +67,25 @@ func NewAssistant(email, initial string, managerId *uuid.UUID) (*User, error) {
 	}
 
 	return &User{
-		ID:        id,
-		Email:     email,
-		Initial:   initial,
-		ManagerID: managerId,
-		Role:      RoleAssistant,
-		IsAdmin:   false,
+		PublicUser: PublicUser{
+			ID:        id,
+			Email:     normalizedEmail,
+			Initial:   normalizedInitial,
+			ManagerID: managerId,
+			Role:      RoleAssistant,
+			IsAdmin:   false,
+		},
 	}, nil
 }
 
 func NewManager(email, initial, googleId string) (*User, error) {
-	if email == "" {
+	normalizedEmail, err := NormalizeEmail(email)
+	if err != nil {
 		return nil, ErrInvalidEmail
+	}
+	normalizedInitial, err := NormalizeInitial(initial)
+	if err != nil {
+		return nil, ErrInvalidInitial
 	}
 
 	id, err := uuid.NewV7()
@@ -62,13 +94,15 @@ func NewManager(email, initial, googleId string) (*User, error) {
 	}
 
 	return &User{
-		ID:        id,
-		Email:     email,
-		Initial:   initial,
-		GoogleID:  googleId,
-		ManagerID: nil,
-		Role:      RoleManager,
-		IsAdmin:   false,
+		PublicUser: PublicUser{
+			ID:        id,
+			Email:     normalizedEmail,
+			Initial:   normalizedInitial,
+			GoogleID:  googleId,
+			ManagerID: nil,
+			Role:      RoleManager,
+			IsAdmin:   false,
+		},
 	}, nil
 }
 
@@ -78,4 +112,13 @@ func (u *User) SetIsAdmin(isAdmin bool) error {
 	}
 	u.IsAdmin = isAdmin
 	return nil
+}
+
+func (u *User) PromoteToManager() error {
+	if u.Role != RoleAssistant {
+		return errors.New("only an assistant can be promoted to manager")
+	}
+	u.Role = RoleManager
+	u.ManagerID = nil
+	return u.Validate()
 }

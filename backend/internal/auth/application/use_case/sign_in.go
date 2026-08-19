@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/Wenev/WeDone/backend/internal/auth/application/dto"
 	"github.com/Wenev/WeDone/backend/internal/auth/application/utility"
@@ -13,10 +14,10 @@ import (
 type SignInUseCase struct {
 	repo   domain.UserRepository
 	hasher utility.PasswordHasher
-	issuer pasetoauth.Issuer
+	issuer *pasetoauth.Issuer
 }
 
-func NewSignInUseCase(repo domain.UserRepository, hasher utility.PasswordHasher, issuer pasetoauth.Issuer) *SignInUseCase {
+func NewSignInUseCase(repo domain.UserRepository, hasher utility.PasswordHasher, issuer *pasetoauth.Issuer) *SignInUseCase {
 	return &SignInUseCase{
 		repo:   repo,
 		hasher: hasher,
@@ -25,28 +26,28 @@ func NewSignInUseCase(repo domain.UserRepository, hasher utility.PasswordHasher,
 }
 
 func (uc *SignInUseCase) Execute(ctx context.Context, input dto.SignInInput) (*dto.AuthOutput, error) {
-	if input.Email == "" && input.Initial == "" {
+	identifier := strings.TrimSpace(input.Identifier)
+	if identifier == "" {
 		return nil, errors.New("email or initial is required")
 	}
 
 	var foundUser *domain.User
 	var err error
-
-	foundUser, err = uc.repo.FindByEmail(ctx, input.Email)
-	if err != nil && errors.Is(err, domain.ErrUserNotFound) {
-		return nil, err
+	if strings.Contains(identifier, "@") {
+		foundUser, err = uc.repo.FindByEmail(ctx, identifier)
+	} else {
+		foundUser, err = uc.repo.FindByInitial(ctx, identifier)
 	}
-	foundUser, err = uc.repo.FindByInitial(ctx, input.Initial)
 	if err != nil && !errors.Is(err, domain.ErrUserNotFound) {
 		return nil, err
 	}
-
 	if foundUser == nil {
-		return nil, errors.New("user not found")
+		return nil, domain.ErrInvalidCredentials
 	}
 
+	
 	if passValidation, err := uc.hasher.Compare(foundUser.Password, input.Password); err != nil || !passValidation {
-		return nil, errors.New("email, initial, or password invalid")
+		return nil, domain.ErrInvalidCredentials
 	}
 
 	token, err := uc.issuer.Issue(foundUser.ID, string(foundUser.Role), foundUser.IsAdmin, foundUser.ManagerID)
