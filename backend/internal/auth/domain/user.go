@@ -14,11 +14,13 @@ const (
 )
 
 var (
-	ErrManagerRequiresNoParent = errors.New("A manager must not have a manager_id")
+	ErrManagerRequiresNoParent = errors.New("a manager must not have a manager_id")
 	ErrInvalidEmail            = errors.New("email is invalid or empty")
 	ErrUserNotFound            = errors.New("user not found")
 	ErrOnlyManagerCanBeAdmin   = errors.New("only a manager can be an admin")
 	ErrInvalidInitial          = errors.New("initial is invalid or empty")
+	ErrInvalidCredentials       = errors.New("email, initial, or password invalid")
+	ErrEmailDomainNotAllowed	= errors.New("email domain is not allowed")
 )
 
 type PublicUser struct {

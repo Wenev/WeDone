@@ -17,8 +17,9 @@ var (
 )
 
 type AssistantSignUpUseCase struct {
-	repo   domain.UserRepository
-	hasher utility.PasswordHasher
+	repo        domain.UserRepository
+	hasher      utility.PasswordHasher
+	emailPolicy domain.EmailDomainPolicy
 }
 
 func NewAssistantSignUpUseCase(repo domain.UserRepository, hasher utility.PasswordHasher) *AssistantSignUpUseCase {
@@ -54,6 +55,11 @@ func (uc *AssistantSignUpUseCase) Execute(ctx context.Context, input dto.Assista
 	if err != nil {
 		return nil, err
 	}
+
+	if err := uc.emailPolicy.Check(user.Email); err != nil {
+		return nil, err
+	}
+
 	user.Password = hashed
 
 	if err := uc.repo.Create(ctx, user); err != nil {

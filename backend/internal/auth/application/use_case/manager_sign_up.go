@@ -13,6 +13,7 @@ import (
 type ManagerSignUpUseCase struct {
 	repo   domain.UserRepository
 	hasher utility.PasswordHasher
+	emailPolicy domain.EmailDomainPolicy
 }
 
 func NewManagerSignUpUseCase(repo domain.UserRepository, hasher utility.PasswordHasher) *ManagerSignUpUseCase {
@@ -58,6 +59,11 @@ func (uc *ManagerSignUpUseCase) Execute(ctx context.Context, input dto.ManagerSi
 	if err != nil {
 		return nil, err
 	}
+
+	if err := uc.emailPolicy.Check(user.Email); err != nil {
+		return nil, err
+	}
+
 	user.Password = hashed
 
 	if err := uc.repo.Create(ctx, user); err != nil {
