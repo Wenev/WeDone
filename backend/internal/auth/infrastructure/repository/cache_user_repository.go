@@ -45,6 +45,13 @@ type CacheUserRepository struct {
 	sf       singleflight.Group
 }
 
+func NewCacheUserRepository(userRepo domain.UserRepository, cache utility.UserCachePort) *CacheUserRepository {	
+	return &CacheUserRepository{
+		userRepo: userRepo,
+		cache:    cache,
+	}
+}
+
 var _ domain.UserRepository = (*CacheUserRepository)(nil)
 
 func (repo *CacheUserRepository) singleFlightKey(key string, fetch func(ctx context.Context) (*domain.User, error)) (*domain.User, error) {
@@ -103,6 +110,14 @@ func (repo *CacheUserRepository) invalidate(ctx context.Context, id uuid.UUID, e
 
 func (repo *CacheUserRepository) Create(ctx context.Context, user *domain.User) error {
 	return repo.userRepo.Create(ctx, user)
+}
+
+func (repo *CacheUserRepository) FindByEmailForAuthentication(ctx context.Context, email string) (*domain.User, error) {
+	return repo.userRepo.FindByEmail(ctx, email)
+}
+
+func (repo *CacheUserRepository) FindByInitialForAuthentication(ctx context.Context, initial string) (*domain.User, error) {
+	return repo.userRepo.FindByInitial(ctx, initial)
 }
 
 func (repo *CacheUserRepository) FindByEmail(ctx context.Context, email string) (*domain.User, error) {
@@ -172,6 +187,14 @@ func (repo *CacheUserRepository) Update(ctx context.Context, user *domain.User) 
 		return err
 	}
 	repo.invalidate(ctx, user.ID, user.Email, user.Initial, user.GoogleID)
+	return nil
+}
+
+func (repo *CacheUserRepository) PromoteToManager(ctx context.Context, id uuid.UUID) error {
+	if err := repo.userRepo.PromoteToManager(ctx, id); err != nil {
+		return err
+	}
+	repo.invalidate(ctx, id, "", "", "")
 	return nil
 }
 

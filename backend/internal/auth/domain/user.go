@@ -113,3 +113,12 @@ func (u *User) SetIsAdmin(isAdmin bool) error {
 	u.IsAdmin = isAdmin
 	return nil
 }
+
+func (u *User) PromoteToManager() error {
+	if u.Role != RoleAssistant {
+		return errors.New("only an assistant can be promoted to manager")
+	}
+	u.Role = RoleManager
+	u.ManagerID = nil
+	return u.Validate()
+}

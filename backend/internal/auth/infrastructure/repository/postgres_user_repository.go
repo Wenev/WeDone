@@ -92,6 +92,22 @@ func (repo *PostgresUserRepository) Update(ctx context.Context, user *domain.Use
 	return nil
 }
 
+func (repo *PostgresUserRepository) PromoteToManager(ctx context.Context, id uuid.UUID) error {
+	result := repo.db.WithContext(ctx).Model(&UserModel{}).
+		Where("id = ?", id).
+		Updates(map[string]interface{}{
+			"role": string(domain.RoleManager), 
+			"manager_id": nil,
+		})
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return domain.ErrUserNotFound
+	}
+	return nil
+}
+
 func (repo *PostgresUserRepository) UpdateAdminStatus(ctx context.Context, id uuid.UUID, isAdmin bool) error {
 	result := repo.db.WithContext(ctx).Model(&UserModel{}).Where("id = ?", id).Update("is_admin", isAdmin)
 	if result.Error != nil {

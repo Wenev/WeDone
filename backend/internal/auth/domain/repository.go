@@ -13,6 +13,12 @@ type UserRepository interface {
 	FindByID(ctx context.Context, id uuid.UUID) (*User, error)
 	FindByInitial(ctx context.Context, initial string) (*User, error)
 	Update(ctx context.Context, user *User) error
+	PromoteToManager(ctx context.Context, id uuid.UUID) error
 	UpdateAdminStatus(ctx context.Context, id uuid.UUID, isAdmin bool) error
 	UpdatePassword(ctx context.Context, id uuid.UUID, password string) error
+}
+
+type CredentialLookupRepository interface {
+	FindByEmailForAuthentication(ctx context.Context, email string) (*User, error)
+	FindByInitialForAuthentication(ctx context.Context, initial string) (*User, error)
 }

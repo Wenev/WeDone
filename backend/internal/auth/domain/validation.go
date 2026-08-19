@@ -15,7 +15,7 @@ func NormalizeInitial(initial string) (string, error) {
 	if len(initialRune) != lengthInitial {
 		return "", ErrInvalidInitial
 	}
-	
+
 	if !isUpperLetter(initialRune[0]) || !isUpperLetter(initialRune[1]) {
 		return "", ErrInvalidInitial
 	}
@@ -49,7 +49,7 @@ func NormalizeEmail(email string) (string, error) {
 	}
 
 	domainPart := addr.Address[at+1:]
-	if !strings.Contains(domainPart, "gmail.com") && !strings.Contains(domainPart, "binus.ac.id") && !strings.Contains(domainPart, "binus.edu") {
+	if !strings.Contains(domainPart, ".") {
 		return "", ErrInvalidEmail
 	}
 

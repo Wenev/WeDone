@@ -10,7 +10,7 @@ func NewEmailDomainPolicy(domains ...string) EmailDomainPolicy {
 	m := make(map[string]bool, len(domains))
 
 	for _, domain := range domains {
-		m[domain] = true
+		m[strings.ToLower(domain)] = true
 	}
 
 	return EmailDomainPolicy{
