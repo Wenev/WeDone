@@ -14,14 +14,14 @@ import (
 type SignInUseCase struct {
 	repo   domain.UserRepository
 	hasher utility.PasswordHasher
-	issuer pasetoauth.Issuer
+	issuer *pasetoauth.Issuer
 }
 
 func NewSignInUseCase(repo domain.UserRepository, hasher utility.PasswordHasher, issuer pasetoauth.Issuer) *SignInUseCase {
 	return &SignInUseCase{
 		repo:   repo,
 		hasher: hasher,
-		issuer: issuer,
+		issuer: &issuer,
 	}
 }
 
